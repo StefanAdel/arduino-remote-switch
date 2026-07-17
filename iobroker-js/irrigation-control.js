@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Stefan Adelhardt
+// SPDX-License-Identifier: MIT
+
 export {}
 
 // iobroker object IDs

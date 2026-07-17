@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Stefan Adelhardt
+// SPDX-License-Identifier: MIT
+
 #if defined(ARDUINO_UNOR4_WIFI)
   #include <WiFiS3.h>
 #endif
