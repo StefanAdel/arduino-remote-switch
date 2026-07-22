@@ -5,6 +5,8 @@
   #include <WiFiS3.h>
 #endif
 
+#include <ArduinoMqttClient.h>
+
 #include <ArduinoGraphics.h>
 #include <Arduino_LED_Matrix.h>
 
@@ -184,6 +186,8 @@ void resetMatrix(bool force = false) {
 
   
 void connectMQTT(){
+  int counter;
+
    // attempt to connect to WiFi network:
   Serial.print("Attempting to (re-) connect to WPA SSID: ");
   Serial.println(ssid);
@@ -197,14 +201,16 @@ void connectMQTT(){
   Serial.println(WiFi.status());
 
   sendInfoToMatrix("?WiFi");
+
+  counter = 0;
   do {
     WiFi.begin(ssid, pass);
 
     Serial.print(".");
 
-    delay(2000);
+    delay(1000);
 
-  } while (WiFi.status() != WL_CONNECTED);
+  } while ((WiFi.status() != WL_CONNECTED) && (counter++ < 30));
   resetMatrix(true);
 
   Serial.println("You're connected to the network");
@@ -233,12 +239,13 @@ void connectMQTT(){
   Serial.print("Attempting to connect to the MQTT broker: ");
   Serial.println(broker);
 
-  while (!mqttClient.connect(broker, port)) {
+  counter = 0;
+  while (!mqttClient.connect(broker, port) && (counter++ < 30)) {
     Serial.print("MQTT connection failed! Error code = ");
     Serial.println(mqttClient.connectError());
     sendInfoToMatrix("!MQTT");
 
-    delay(2000);
+    delay(1000);
   }
   resetMatrix(true);
  

@@ -93,17 +93,25 @@ async function StartIrrigation(index: number, duration: number, recover: number,
     // start valve
     if (await SetCheckWaitValue(shouldVal[index], isVal[index], 0))
         console.info("IrrigationControl: Starting valve " + (index+1) + " successful.");
+    else {
+        await StopIrrigation();
+        return;
+    }  
 
     for (let currC = 1; currC <= cycles; currC++) {
         console.debug("IrrigationControl: Starting circuit " + (index+1) + " (" + shouldVal[index] + "), cycle " + currC);
 
         if (await SetCheckWaitValue(shouldPump, isPump, 0))
             console.info("IrrigationControl: Starting pump successful (cycle: " + currC + ").");
+        else   
+            break;
 
         await wait(duration);
 
         if (await SetCheckWaitValue(shouldPump, isPump, 1))
             console.info("IrrigationControl: Stopping pump successful (cycle: " + currC + ").");
+        else
+           break;
 
         await wait(recover);
     }
@@ -145,13 +153,13 @@ async function SetCheckWaitValue(setidstr: string, getidstr: string,  expVal: nu
         val = getState(getidstr).val;
         console.debug("IrrigationControl: Waiting for " + getidstr + " to become " + expVal);
 
-        if (++cnt == 3600) {
-            // 60 minutes gone.
-            console.error("IrrigationControl: Waiting for " + getidstr + " to become " + expVal + "failed for 60 min. Aborting");
+        if (++cnt >= 1800) {
+            // 30 minutes gone.
+            console.error("IrrigationControl: Waiting for " + getidstr + " to become " + expVal + "failed for 30 min. Aborting");
             return false;
         }
-        else if (cnt % 100 == 0) {
-            console.warn("IrrigationControl: Waiting for " + getidstr + " to become " + expVal + "failed for 100 secs. Starting Retry #" + (Number)(cnt/10));
+        else if ((cnt / 300) == 0) {
+            console.warn("IrrigationControl: Waiting for " + getidstr + " to become " + expVal + "failed for 5 min. Starting Retry #" + (Number)(cnt/10));
             setState(setidstr, expVal);
         }
     } while (val != expVal);
